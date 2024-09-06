@@ -28,6 +28,7 @@ import static guru.springframework.spring6resttemplate.client.BeerClientImpl.GET
 import static guru.springframework.spring6resttemplate.client.BeerClientImpl.GET_BEER_PATH_VAR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestToUriTemplate;
@@ -77,6 +78,7 @@ public class BeerClientMockTest {
 
 		server.expect(method(HttpMethod.GET))
 			.andExpect(requestTo(GET_BEER_PATH))
+			.andExpect(header("Authorization", "Basic dXNlcjE6cGFzc3dvcmQ="))
 			.andRespond(withSuccess(payload, MediaType.APPLICATION_JSON));
 
 		Page<BeerDTO> dtos = beerClient.findAllBeers();
@@ -92,6 +94,7 @@ public class BeerClientMockTest {
 
 		server.expect(method(HttpMethod.GET))
 			.andExpect(requestTo(uri))
+			.andExpect(header("Authorization", "Basic dXNlcjE6cGFzc3dvcmQ="))
 			.andRespond(withSuccess(payload, MediaType.APPLICATION_JSON));
 
 		Page<BeerDTO> dtos = beerClient.findAllBeers(Map.of("beerName", "Mango Bobs"));
@@ -116,6 +119,7 @@ public class BeerClientMockTest {
 
 		server.expect(method(HttpMethod.POST))
 			.andExpect(requestTo(GET_BEER_PATH))
+			.andExpect(header("Authorization", "Basic dXNlcjE6cGFzc3dvcmQ="))
 			.andRespond(withCreatedEntity(uri));
 
 		getByIdMock();
@@ -128,6 +132,7 @@ public class BeerClientMockTest {
 	void testUpdateBeer() throws JsonProcessingException {
 		server.expect(method(HttpMethod.PUT))
 			.andExpect(requestToUriTemplate(GET_BEER_PATH_VAR, beerDtoWithId.getId()))
+			.andExpect(header("Authorization", "Basic dXNlcjE6cGFzc3dvcmQ="))
 			.andRespond(withNoContent());
 
 		getByIdMock();
@@ -141,6 +146,7 @@ public class BeerClientMockTest {
 
 		server.expect(method(HttpMethod.GET))
 			.andExpect(requestToUriTemplate(GET_BEER_PATH_VAR, beerDtoWithId.getId()))
+			.andExpect(header("Authorization", "Basic dXNlcjE6cGFzc3dvcmQ="))
 			.andRespond(withSuccess(payload, MediaType.APPLICATION_JSON));
 	}
 
@@ -148,6 +154,7 @@ public class BeerClientMockTest {
 	void testDeleteBeer() {
 		server.expect(method(HttpMethod.DELETE))
 			.andExpect(requestToUriTemplate(GET_BEER_PATH_VAR, beerDtoWithId.getId()))
+			.andExpect(header("Authorization", "Basic dXNlcjE6cGFzc3dvcmQ="))
 			.andRespond(withNoContent());
 		beerClient.deleteBeer(beerDtoWithId.getId());
 
@@ -158,6 +165,7 @@ public class BeerClientMockTest {
 	void testDeleteBeerNotFound() {
 		server.expect(method(HttpMethod.DELETE))
 			.andExpect(requestToUriTemplate(GET_BEER_PATH_VAR, beerDtoWithId.getId()))
+			.andExpect(header("Authorization", "Basic dXNlcjE6cGFzc3dvcmQ="))
 			.andRespond(withResourceNotFound());
 
 		assertThrows(HttpClientErrorException.class, () -> {
