@@ -6,9 +6,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.web.client.RestTemplate;
-
-import java.time.Duration;
 
 @Configuration
 public class RestTemplateConfig {
@@ -18,19 +22,27 @@ public class RestTemplateConfig {
 	@Value("${rest.template.rootUrl}")
 	public String BASE_URL;
 
-	@Value("${rest.template.authentication.username}")
-	private String username;
+	@Bean
+	OAuth2AuthorizedClientManager auth2AuthorizedClientManager(
+			ClientRegistrationRepository clientRegistrationRepository,
+			OAuth2AuthorizedClientService oAuth2AuthorizedClientService ){
 
-	@Value("${rest.template.authentication.password}")
-	private String password;
+		OAuth2AuthorizedClientProvider authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder()
+			.clientCredentials()
+			.build();
+
+		AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager =
+			new AuthorizedClientServiceOAuth2AuthorizedClientManager (
+				clientRegistrationRepository, oAuth2AuthorizedClientService);
+		authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
+		return authorizedClientManager;
+	}
 
 	@Bean
-	public RestTemplate restTemplate(RestTemplateBuilder builder) {
+	public RestTemplate restTemplate(RestTemplateBuilder builder, OAuthClientInterceptor interceptor) {
 		return builder
-			.setConnectTimeout(Duration.ofSeconds(5))
-			.setReadTimeout(Duration.ofSeconds(5))
 			.rootUri(BASE_URL)
-			.basicAuthentication(username, password)
+			.additionalInterceptors(interceptor)
 			.build();
 	}
 }
